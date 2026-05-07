@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("OvejaNegra")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+a91829d191e83ef7534c69b6df0fb3f58b7d626e")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+4b4f3eb2816a6dda3b72d9ec475b0401bcc225f3")]
 [assembly: System.Reflection.AssemblyProductAttribute("OvejaNegra")]
 [assembly: System.Reflection.AssemblyTitleAttribute("OvejaNegra")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
