@@ -33,34 +33,63 @@ namespace OvejaNegra.Controllers
         EstadoEnum.Pendiente,
         EstadoEnum.EnPreparacion,
         EstadoEnum.ListoParaServir,
-        EstadoEnum.Servido
+        EstadoEnum.Servido,
     };
 
             var comandas = await _context.Comandas
-                .Include(c => c.Usuario)
-                .Where(c => estadosActivos.Contains(c.Estado))
-                .OrderBy(c => c.Fecha)
-                .ToListAsync();
+            .Include(c => c.Usuario)
+            .Include(c => c.DetallesComanda)
+            .ThenInclude(d => d.Producto)
+            .Where(c => estadosActivos.Contains(c.Estado))
+            .OrderBy(c => c.Fecha)
+            .ToListAsync();
 
             return View(comandas);
         }
         [HttpPost]
         public async Task<IActionResult> CambiarEstado([FromBody] CambiarEstadoDTO dto)
         {
-            var comanda = await _context.Comandas.FindAsync(dto.ComandaId);
-            if (comanda == null) return NotFound();
+            var comanda = await _context.Comandas
+                .Include(c => c.DetallesComanda)
+                .FirstOrDefaultAsync(c => c.Id == dto.ComandaId);
+
+            if (comanda == null)
+                return NotFound();
 
             comanda.Estado = (EstadoEnum)dto.Estado;
+            if (comanda.Estado == EstadoEnum.Cobrado)
+            {
+                bool existeVenta = await _context.Ventas
+                    .AnyAsync(v => v.ComandaId == comanda.Id);
 
-            // Si es Cancelado, eliminar la comanda
+                if (!existeVenta)
+                {
+                    decimal total = comanda.DetallesComanda
+                        .Sum(d => d.Cantidad * d.Precio_unitario);
+
+                    var venta = new Venta
+                    {
+                        Fecha = DateTime.Now,
+                        ComandaId = comanda.Id,
+                        Total = total,
+                        MetodoPago = PagoEnum.Efectivo
+                    };
+
+                    _context.Ventas.Add(venta);
+                }
+            }
             if (comanda.Estado == EstadoEnum.Cancelado)
             {
-                var detalles = _context.DetalleComandas.Where(d => d.ComandaId == comanda.Id);
+                var detalles = _context.DetalleComandas
+                    .Where(d => d.ComandaId == comanda.Id);
+
                 _context.DetalleComandas.RemoveRange(detalles);
+
                 _context.Comandas.Remove(comanda);
             }
 
             await _context.SaveChangesAsync();
+
             return Json(new { ok = true });
         }
         // GET: Comandas/Details/5
@@ -132,7 +161,7 @@ namespace OvejaNegra.Controllers
                     ProductoId = producto.Id,
                     Cantidad = item.Value.Cantidad,
                     Precio_unitario = producto.Precio,
-                    Observacion = item.Value.Observacion // 👈 AQUÍ
+                    Observacion = item.Value.Observacion
                 });
             }
 
@@ -283,6 +312,81 @@ namespace OvejaNegra.Controllers
         private bool ComandaExists(int id)
         {
             return _context.Comandas.Any(e => e.Id == id);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Cobrar([FromBody] CobrarDTO dto)
+        {
+            try
+            {
+                var comanda = await _context.Comandas
+                    .Include(c => c.DetallesComanda)
+                    .FirstOrDefaultAsync(c => c.Id == dto.ComandaId);
+
+                if (comanda == null)
+                {
+                    return Json(new
+                    {
+                        ok = false,
+                        msg = "Comanda no encontrada"
+                    });
+                }
+
+                // BUSCAR CLIENTE
+                var cliente = await _context.Clientes
+                    .FirstOrDefaultAsync(c => c.NITCI == dto.CiNit);
+
+                // CREAR SI NO EXISTE
+                if (cliente == null)
+                {
+                    cliente = new Cliente
+                    {
+                        Nombre = dto.NombreCliente,
+                        NITCI = dto.CiNit
+                    };
+
+                    _context.Clientes.Add(cliente);
+
+                    await _context.SaveChangesAsync();
+                }
+
+                // TOTAL
+                decimal total = comanda.DetallesComanda
+                    .Sum(x => x.Cantidad * x.Precio_unitario);
+
+                // CREAR VENTA
+                var venta = new Venta
+                {
+                    Fecha = DateTime.Now,
+                    Total = total,
+
+                    MetodoPago = dto.MetodoPago,
+
+                    ComandaId = comanda.Id,
+
+                    ClienteId = cliente.Id
+                };
+
+                _context.Ventas.Add(venta);
+
+                // CAMBIAR ESTADO
+                comanda.Estado = EstadoEnum.Cobrado;
+
+                await _context.SaveChangesAsync();
+
+                return Json(new
+                {
+                    ok = true
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    ok = false,
+                    msg = ex.Message
+                });
+            }
         }
     }
 }

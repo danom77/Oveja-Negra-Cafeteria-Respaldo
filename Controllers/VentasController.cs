@@ -24,8 +24,20 @@ namespace OvejaNegra.Controllers
         // GET: Ventas
         public async Task<IActionResult> Index()
         {
-            var miContext = _context.Ventas.Include(v => v.Comanda);
-            return View(await miContext.ToListAsync());
+            var ventas = await _context.Ventas
+
+                .Include(v => v.Cliente)
+
+                .Include(v => v.Comanda)
+                    .ThenInclude(c => c.DetallesComanda)
+                        .ThenInclude(d => d.Producto)
+
+                .OrderByDescending(v => v.Fecha)
+
+                .ToListAsync();
+
+            return View(ventas);
+
         }
 
         // GET: Ventas/Details/5
@@ -133,8 +145,10 @@ namespace OvejaNegra.Controllers
             }
 
             var venta = await _context.Ventas
+                .Include(v => v.Cliente)
                 .Include(v => v.Comanda)
-                .FirstOrDefaultAsync(m => m.Id == id);
+                .ToListAsync();
+
             if (venta == null)
             {
                 return NotFound();

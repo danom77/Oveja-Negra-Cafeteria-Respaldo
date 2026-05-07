@@ -1,187 +1,441 @@
 ﻿@model OvejaNegra.ViewModels.EditarComandaVM
 
-<h2>Editar Pedido - Mesa @Model.NroMesa</h2>
-<input type="hidden" id="comandaId" value="@Model.ComandaId" />
-<div class="mb-3">
-    <label>Mesa:</label>
-    <select id="mesa" class="form-control">
-        @for (int i = 1; i <= 10; i++)
-        {
-            if (Model.NroMesa == i)
-            {
-                <option value="@i" selected>Mesa @i</option>
-            }
-            else
-            {
-                <option value="@i">Mesa @i</option>
-            }
-        }
-    </select>
-</div>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
 
-<hr />
-<h4>Productos en el pedido</h4>
-<div id="pedido-actual">
-    @foreach (var cat in Model.Categorias)
-    {
-        foreach (var prod in cat.Productos)
-        {
-            if (Model.Items.ContainsKey(prod.Id))
+<style>
+    body {
+        font-family: 'Poppins', sans-serif;
+        background: #f5f2ea;
+    }
+
+    .categoria-btn {
+        border: none;
+        padding: 10px 18px;
+        border-radius: 12px;
+        background: #e8e3d9;
+        margin-right: 10px;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+        .categoria-btn:hover {
+            background: #d4cdbf;
+        }
+
+        .categoria-btn.active {
+            background: #1f1f1f;
+            color: white;
+        }
+
+    .card-producto {
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        background: white;
+        transition: 0.2s;
+        height: 100%;
+    }
+
+        .card-producto:hover {
+            transform: scale(1.03);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+        }
+
+    .card-img {
+        height: 150px;
+        object-fit: cover;
+        width: 100%;
+    }
+
+    .precio {
+        font-weight: bold;
+        color: #7a5c2e;
+        font-size: 1.2rem;
+    }
+
+    .contador {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 10px 0;
+    }
+
+        .contador button {
+            border: none;
+            padding: 5px 12px;
+            border-radius: 8px;
+            background: #e8e3d9;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+            .contador button:hover {
+                background: #d4cdbf;
+                transform: scale(1.05);
+            }
+
+        .contador span {
+            font-weight: bold;
+            min-width: 30px;
+            text-align: center;
+        }
+
+    .carrito {
+        background: #fff;
+        border-radius: 16px;
+        padding: 20px;
+        margin-top: 30px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        position: sticky;
+        top: 20px;
+    }
+
+    .carrito-item {
+        border-bottom: 1px solid #eee;
+        padding: 10px 0;
+    }
+
+    .total-pedido {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #2c5f2d;
+        margin: 15px 0;
+    }
+
+    .btn-actualizar {
+        background: #2c5f2d;
+        color: white;
+        padding: 12px;
+        font-weight: bold;
+        border: none;
+        border-radius: 10px;
+        width: 100%;
+        transition: 0.3s;
+    }
+
+        .btn-actualizar:hover {
+            background: #1e401f;
+            transform: translateY(-2px);
+        }
+
+    .btn-limpiar {
+        background: #dc3545;
+        color: white;
+        border: none;
+        padding: 5px 15px;
+        border-radius: 8px;
+    }
+
+    .badge-mesa {
+        background: #1f1f1f;
+        color: white;
+        padding: 8px 16px;
+        border-radius: 10px;
+        display: inline-block;
+        margin-bottom: 20px;
+    }
+
+    .observacion-input {
+        font-size: 0.85rem;
+        margin-top: 8px;
+    }
+</style>
+
+<div class="container mt-4">
+    <h2 class="mb-3">Editar Comanda #@Model.ComandaId</h2>
+
+    <div class="badge-mesa">
+        Mesa <strong>@Model.NroMesa</strong>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label fw-bold">Cambiar número de mesa:</label>
+        <select id="mesa" class="form-control w-auto" style="max-width: 200px;">
+            @for (int i = 1; i <= 10; i++)
             {
-                var item = Model.Items[prod.Id];
-                <div class="card mb-2">
-                    <div class="card-body d-flex justify-content-between align-items-center">
-                        <div>
+                if (i == Model.NroMesa)
+                {
+                    <option value="@i" selected>Mesa @i</option>
+                }
+                else
+                {
+                    <option value="@i">Mesa @i</option>
+                }
+            }
+        </select>
+    </div>
+
+
+    <div class="d-flex flex-wrap mb-4 gap-2">
+        @foreach (var cat in Model.Categorias)
+        {
+            <button class="categoria-btn" onclick="filtrar(@cat.Id, this)">
+                @cat.Nombre
+            </button>
+        }
+    </div>
+
+    <div class="row" id="productos">
+        @foreach (var cat in Model.Categorias)
+        {
+            foreach (var prod in cat.Productos)
+            {
+                var cantidadActual = Model.Items != null && Model.Items.ContainsKey(prod.Id)
+                ? Model.Items[prod.Id].Cantidad : 0;
+                var observacionActual = Model.Items != null && Model.Items.ContainsKey(prod.Id)
+                ? Model.Items[prod.Id].Observacion : "";
+
+                <div class="col-md-3 col-sm-6 mb-4 producto" data-cat="@cat.Id">
+                    <div class="card-producto">
+                        <img src="@(string.IsNullOrEmpty(prod.Imagen)
+                            ? "/imagenes/no-image.jpeg"
+                            : Url.Content("~/uploads/" + prod.Imagen))"
+                             class="card-img" />
+
+                        <div class="p-3">
                             <h5>@prod.Nombre</h5>
-                            <p class="mb-0">Bs @prod.Precio</p>
+                            <div class="precio">@prod.Precio.ToString("N2") Bs.</div>
+
+                            <div class="contador">
+                                <button type="button" onclick="cambiarCantidad(@prod.Id, -1)">-</button>
+                                <span id="cant-@prod.Id">@cantidadActual</span>
+                                <button type="button" onclick="cambiarCantidad(@prod.Id, 1)">+</button>
+                            </div>
+
+                            <input type="text"
+                                   id="obs-@prod.Id"
+                                   class="form-control observacion-input"
+                                   placeholder="Observación (ej: sin cebolla)"
+                                   value="@observacionActual" />
                         </div>
-                        <div class="text-center">
-                            <button onclick="cambiar(@prod.Id, -1)">-</button>
-                            <span id="cant-@prod.Id">@item.Cantidad</span>
-                            <button onclick="cambiar(@prod.Id, 1)">+</button>
-                        </div>
-                        <input type="text"
-                               id="obs-@prod.Id"
-                               class="form-control mt-2"
-                               placeholder="observ..."
-                               value="@item.Observacion" />
                     </div>
                 </div>
             }
         }
-    }
-</div>
+    </div>
 
-<hr />
-<h4>Agregar productos</h4>
-<div class="d-flex overflow-auto mb-3">
-    @foreach (var cat in Model.Categorias)
-    {
-        <button class="btn btn-dark me-2" onclick="filtrar(@cat.Id)">
-            @cat.Nombre
+    <div class="carrito">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="mb-0"> Productos seleccionados</h5>
+            <button class="btn btn-sm btn-limpiar" onclick="limpiarCarrito()">
+                 Limpiar todo
+            </button>
+        </div>
+
+        <div id="lista-carrito">
+
+            <p class="text-muted text-center">No hay productos seleccionados</p>
+        </div>
+
+        <div class="total-pedido">
+            Total: <span id="total">0.00</span> Bs.
+        </div>
+
+        <button class="btn-actualizar" onclick="actualizarPedido()">
+            Actualizar Pedido
         </button>
-    }
-</div>
 
-<div id="productos">
-    @foreach (var cat in Model.Categorias)
-    {
-        foreach (var prod in cat.Productos)
-        {
-            if (!Model.Items.ContainsKey(prod.Id))
-            {
-                <div class="card mb-2 producto" data-cat="@cat.Id">
-                    <div class="card-body d-flex justify-content-between align-items-center">
-                        <div>
-                            <h5>@prod.Nombre</h5>
-                            <p class="mb-0">Bs @prod.Precio</p>
-                        </div>
-                        <div class="text-center">
-                            <button onclick="cambiar(@prod.Id, -1)">-</button>
-                            <span id="cant-@prod.Id">0</span>
-                            <button onclick="cambiar(@prod.Id, 1)">+</button>
-                        </div>
-                        <input type="text"
-                               id="obs-@prod.Id"
-                               class="form-control mt-2"
-                               placeholder="observ..." />
-                    </div>
-                </div>
-            }
-        }
-    }
+        <button class="btn btn-secondary w-100 mt-2" onclick="window.location.href='/Comandas/Index'">
+            Cancelar
+        </button>
+    </div>
 </div>
-
-<hr />
-<h4>Total</h4>
-<ul id="lista"></ul>
-<h3>Total: Bs <span id="total">0</span></h3>
-<button class="btn btn-success" onclick="guardar()">Guardar Cambios</button>
 
 <script>
     let carrito = {};
     let precios = {};
     let nombres = {};
 
-    const itemsGuardados = @Html.Raw(Json.Serialize(Model.Items));
+
+    function parsearPrecio(precioTexto) {
+
+        let limpio = precioTexto.replace("Bs.", "").trim();
+
+
+        limpio = limpio.replace(/,/g, "");
+
+        let precio = parseFloat(limpio);
+
+
+        if (precio > 500) {
+            console.log(`Precio original: ${precio}, dividiendo entre 100`);
+            precio = precio / 100;
+        }
+
+        return precio;
+    }
+
+
     document.querySelectorAll("[id^='cant-']").forEach(el => {
         let id = el.id.split("-")[1];
-        let card = el.closest(".card");
+        let card = el.closest(".card-producto");
+
         let nombre = card.querySelector("h5").innerText;
-        let precio = card.querySelector("p").innerText.replace("Bs ", "");
+        let precioTexto = card.querySelector(".precio").innerText;
+
+
+        let precio = parsearPrecio(precioTexto);
+
+        console.log(`Producto ${id}: "${precioTexto}" -> ${precio} Bs.`); 
+
         nombres[id] = nombre;
-        precios[id] = parseFloat(precio);
+        precios[id] = precio;
+
+        let cantidadInicial = parseInt(el.innerText);
+        if (cantidadInicial > 0) {
+            carrito[id] = {
+                cantidad: cantidadInicial,
+                observacion: document.getElementById("obs-" + id).value
+            };
+        }
     });
-    for (let id in itemsGuardados) {
-        let item = itemsGuardados[id];
-        carrito[id] = {
-            cantidad: item.cantidad,
-            observacion: item.observacion || ""
-        };
-    }
-    render();
 
-    function filtrar(id) {
-        document.querySelectorAll(".producto").forEach(p => {
-            p.style.display = p.dataset.cat == id ? "block" : "none";
-        });
-    }
 
-    function cambiar(id, val) {
-        if (!carrito[id]) {
-            carrito[id] = { cantidad: 0, observacion: "" };
-        }
-        carrito[id].cantidad += val;
-        if (carrito[id].cantidad < 0) carrito[id].cantidad = 0;
-        carrito[id].observacion = document.getElementById("obs-" + id).value;
-        document.getElementById("cant-" + id).innerText = carrito[id].cantidad;
-        render();
-    }
-
-    function render() {
-        let lista = document.getElementById("lista");
-        lista.innerHTML = "";
+    function renderizarCarrito() {
+        let contenedor = document.getElementById("lista-carrito");
         let total = 0;
-        for (let id in carrito) {
-            let item = carrito[id];
-            if (item.cantidad > 0) {
-                let li = document.createElement("li");
-                li.innerText = nombres[id] + " x " + item.cantidad +
-                    (item.observacion ? " (" + item.observacion + ")" : "");
-                lista.appendChild(li);
-                total += item.cantidad * precios[id];
-            }
-        }
-        document.getElementById("total").innerText = total.toFixed(2);
-    }
 
-    function guardar() {
-        let itemsFiltrados = {};
-        for (let id in carrito) {
-            if (carrito[id].cantidad > 0) {
-                itemsFiltrados[id] = carrito[id];
-            }
-        }
-        if (Object.keys(itemsFiltrados).length === 0) {
-            alert("Tiene que seleccionar al menos 1 producto");
+        let items = Object.keys(carrito).filter(id => carrito[id].cantidad > 0);
+
+        if (items.length === 0) {
+            contenedor.innerHTML = '<p class="text-muted text-center">No hay productos seleccionados</p>';
+            document.getElementById("total").innerText = "0.00";
             return;
         }
 
+        let html = '<div class="list-group">';
+
+        for (let id of items) {
+            let item = carrito[id];
+            let subtotal = item.cantidad * precios[id];
+            total += subtotal;
+
+            html += `
+                <div class="carrito-item">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <strong>${nombres[id]}</strong>
+                            <span class="badge bg-secondary ms-2">x${item.cantidad}</span>
+                            ${item.observacion ? `<br><small class="text-muted">📝 ${item.observacion}</small>` : ''}
+                        </div>
+                        <div>
+                            <span class="fw-bold">${subtotal.toFixed(2)} Bs.</span>
+                            <button class="btn btn-sm btn-link text-danger" onclick="eliminarProducto(${id})">
+                                ❌
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        html += '</div>';
+        contenedor.innerHTML = html;
+        document.getElementById("total").innerHTML = total.toFixed(2);
+    }
+
+    function cambiarCantidad(id, delta) {
+        if (!carrito[id]) {
+            carrito[id] = {
+                cantidad: 0,
+                observacion: ""
+            };
+        }
+
+        let nuevaCantidad = carrito[id].cantidad + delta;
+        if (nuevaCantidad < 0) nuevaCantidad = 0;
+
+        carrito[id].cantidad = nuevaCantidad;
+        carrito[id].observacion = document.getElementById("obs-" + id).value;
+
+        document.getElementById("cant-" + id).innerText = nuevaCantidad;
+
+        renderizarCarrito();
+    }
+
+    function eliminarProducto(id) {
+        if (carrito[id]) {
+            carrito[id].cantidad = 0;
+            document.getElementById("cant-" + id).innerText = "0";
+            renderizarCarrito();
+        }
+    }
+
+    function limpiarCarrito() {
+        carrito = {};
+        document.querySelectorAll("[id^='cant-']").forEach(el => {
+            el.innerText = "0";
+        });
+        document.querySelectorAll("[id^='obs-']").forEach(el => {
+            el.value = "";
+        });
+        renderizarCarrito();
+    }
+
+    function filtrar(categoriaId, btn) {
+        document.querySelectorAll(".producto").forEach(p => {
+            let mostrar = parseInt(p.dataset.cat) === categoriaId;
+            p.style.display = mostrar ? "block" : "none";
+        });
+
+        document.querySelectorAll(".categoria-btn").forEach(b => {
+            b.classList.remove("active");
+        });
+        btn.classList.add("active");
+    }
+
+    function actualizarPedido() {
         let mesa = document.getElementById("mesa").value;
-        let comandaId = document.getElementById("comandaId").value;
+
+        let itemsFiltrados = {};
+        for (let id in carrito) {
+            if (carrito[id].cantidad > 0) {
+                itemsFiltrados[id] = {
+                    cantidad: carrito[id].cantidad,
+                    observacion: carrito[id].observacion || ""
+                };
+            }
+        }
+
+        if (Object.keys(itemsFiltrados).length === 0) {
+            alert("⚠️ Agrega al menos un producto antes de actualizar.");
+            return;
+        }
+
+        let data = {
+            comandaId: @Model.ComandaId,
+            nroMesa: parseInt(mesa),
+            items: itemsFiltrados
+        };
+
         fetch('/Comandas/EditarPedido', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                comandaId: parseInt(comandaId),
-                nroMesa: parseInt(mesa),
-                items: itemsFiltrados
-            })
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
         })
         .then(r => r.json())
         .then(d => {
-                       alert("Pedido actualizado");
-            window.location.href = '/Comandas/Index';
+            if (d.ok) {
+                alert("✅ Pedido actualizado correctamente");
+                window.location.href = d.redirect;
+            } else {
+                alert("❌ Error al actualizar el pedido");
+            }
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            alert("❌ Error al procesar la solicitud");
         });
     }
+
+    if (document.querySelectorAll(".producto").length > 0) {
+        let primerBoton = document.querySelector(".categoria-btn");
+        if (primerBoton) {
+            primerBoton.click();
+        }
+    }
+
+    renderizarCarrito();
 </script>

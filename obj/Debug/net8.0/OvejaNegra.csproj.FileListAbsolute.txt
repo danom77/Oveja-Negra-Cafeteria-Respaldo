@@ -1821,3 +1821,5 @@ C:\Users\DANIEL\Desktop\C#\OvejaNegra - 5to avance\OvejaNegra\obj\Debug\net8.0\s
 C:\Users\DANIEL\Desktop\C#\OvejaNegra - 5to avance\OvejaNegra\obj\Debug\net8.0\OvejaNegra.csproj.Up2Date
 C:\Users\DANIEL\Desktop\C#\OvejaNegra - 5to avance\OvejaNegra\obj\Debug\net8.0\OvejaNegra.genruntimeconfig.cache
 C:\Users\DANIEL\Desktop\C#\OvejaNegra - 5to avance\OvejaNegra\obj\Debug\net8.0\ref\OvejaNegra.dll
+C:\Users\DANIEL\Desktop\C#\OvejaNegra - 5to avance\OvejaNegra\obj\Debug\net8.0\OvejaNegra.sourcelink.json
+C:\Users\DANIEL\Desktop\C#\OvejaNegra - 5to avance\OvejaNegra\bin\Debug\net8.0\libwkhtmltox.so

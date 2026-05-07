@@ -1,14 +1,78 @@
 ﻿@model OvejaNegra.ViewModels.CrearComandaVM
 
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+    body {
+        font-family: 'Poppins', sans-serif;
+        background: #f5f2ea;
+    }
+
+    .categoria-btn {
+        border: none;
+        padding: 10px 18px;
+        border-radius: 12px;
+        background: #e8e3d9;
+        margin-right: 10px;
+        cursor: pointer;
+    }
+
+        .categoria-btn.active {
+            background: #1f1f1f;
+            color: white;
+        }
+
+    .card-producto {
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        background: white;
+        transition: 0.2s;
+    }
+
+        .card-producto:hover {
+            transform: scale(1.03);
+        }
+
+    .card-img {
+        height: 150px;
+        object-fit: cover;
+        width: 100%;
+    }
+
+    .precio {
+        font-weight: bold;
+        color: #7a5c2e;
+    }
+
+    .contador {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+        .contador button {
+            border: none;
+            padding: 5px 10px;
+            border-radius: 8px;
+            background: #eee;
+        }
+
+    .carrito {
+        background: #fff;
+        border-radius: 16px;
+        padding: 15px;
+        margin-top: 30px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+</style>
+
 <h2>Nuevo Pedido</h2>
 
 <div class="mb-3">
     <label>Mesa:</label>
-    
-
     <select id="mesa" class="form-control">
         <option value="">Seleccione mesa</option>
-
         @for (int i = 1; i <= 10; i++)
         {
             <option value="@i">Mesa @i</option>
@@ -16,80 +80,97 @@
     </select>
 </div>
 
-
-<div class="d-flex overflow-auto mb-3">
+<div class="d-flex mb-4">
     @foreach (var cat in Model.Categorias)
     {
-        <button class="btn btn-dark me-2" onclick="filtrar(@cat.Id)">
+        <button class="categoria-btn" onclick="filtrar(@cat.Id, this)">
             @cat.Nombre
         </button>
     }
 </div>
 
 
-<div id="productos">
+<div class="row" id="productos">
     @foreach (var cat in Model.Categorias)
     {
         foreach (var prod in cat.Productos)
         {
-            <div class="card mb-2 producto" data-cat="@cat.Id">
-                <div class="card-body d-flex justify-content-between">
+            <div class="col-md-3 mb-4 producto" data-cat="@cat.Id">
+                <div class="card-producto">
 
-                    <div>
+                    <img src="@(string.IsNullOrEmpty(prod.Imagen)
+                        ? "/imagen/no-image.jpeg"
+                        : Url.Content("~/uploads/" + prod.Imagen))"
+                         class="card-img" />
+
+
+                    <div class="p-3">
                         <h5>@prod.Nombre</h5>
-                        <p>Bs @prod.Precio</p>
+                        <div class="precio">@prod.Precio Bs.</div>
+
+                        <div class="contador mt-2">
+                            <button onclick="cambiar(@prod.Id, -1)">-</button>
+                            <span id="cant-@prod.Id">0</span>
+                            <button onclick="cambiar(@prod.Id, 1)">+</button>
+                        </div>
+
+                        <input type="text"
+                               id="obs-@prod.Id"
+                               class="form-control mt-2"
+                               placeholder="Observación..." />
                     </div>
 
-                    <div>
-                        <button onclick="cambiar(@prod.Id, -1)">-</button>
-                        <span id="cant-@prod.Id">0</span>
-                        <button onclick="cambiar(@prod.Id, 1)">+</button>
-                    </div>
-                    <input type="text"
-                           id="obs-@prod.Id"
-                           class="form-control mt-2"
-                           placeholder="observ..." />
                 </div>
             </div>
         }
     }
 </div>
 
-<hr />
 
-<h4>Pedido</h4>
-<ul id="lista"></ul>
+<div class="carrito">
+    <div class="d-flex justify-content-between">
+        <h5>Productos Seleccionados</h5>
+        <button class="btn btn-sm btn-danger" onclick="limpiar()">Limpiar</button>
+    </div>
 
-<h3>Total: Bs <span id="total">0</span></h3>
+    <ul id="lista"></ul>
 
-<button class="btn btn-success" onclick="guardar()">Guardar</button>
+    <h4>Total: <span id="total">0</span> Bs.</h4>
 
+    <button class="btn btn-success w-100" onclick="guardar()">Guardar Pedido</button>
+</div>
 
 <script>
     let carrito = {};
     let precios = {};
     let nombres = {};
 
-    document.querySelectorAll("[id^='cant-']").forEach(el => {
+        document.querySelectorAll("[id^='cant-']").forEach(el => {
         let id = el.id.split("-")[1];
-
-        let card = el.closest(".card");
+        let card = el.closest(".card-producto");
 
         let nombre = card.querySelector("h5").innerText;
+        let precioTexto = card.querySelector(".precio").innerText;
 
-        let precio = card.querySelector("p").innerText.replace("Bs ", "");
+        let precioLimpio = precioTexto.replace("Bs.", "").replace(/\s/g, "").replace(",", ".");
+        let precio = parseFloat(precioLimpio);
+
+        console.log(`Producto ${id}: texto="${precioTexto}" -> limpio="${precioLimpio}" -> numero=${precio}`);
 
         nombres[id] = nombre;
-        precios[id] = parseFloat(precio);
+        precios[id] = precio;
     });
 
-    function filtrar(id) {
+    function filtrar(id, btn) {
         document.querySelectorAll(".producto").forEach(p => {
             p.style.display = p.dataset.cat == id ? "block" : "none";
         });
+
+        document.querySelectorAll(".categoria-btn").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
     }
 
-        function cambiar(id, val) {
+    function cambiar(id, val) {
 
         if (!carrito[id]) {
             carrito[id] = {
@@ -97,26 +178,23 @@
                 observacion: ""
             };
         }
-        carrito[id].cantidad += val;
-        if (carrito[id].cantidad < 0)
-            carrito[id].cantidad = 0;
 
-        let obs = document.getElementById("obs-" + id).value;
-        carrito[id].observacion = obs;
+        carrito[id].cantidad += val;
+        if (carrito[id].cantidad < 0) carrito[id].cantidad = 0;
+
+        carrito[id].observacion = document.getElementById("obs-" + id).value;
 
         document.getElementById("cant-" + id).innerText = carrito[id].cantidad;
 
         render();
     }
 
-        function render() {
+    function render() {
         let lista = document.getElementById("lista");
         lista.innerHTML = "";
-
         let total = 0;
 
         for (let id in carrito) {
-
             let item = carrito[id];
 
             if (item.cantidad > 0) {
@@ -136,6 +214,12 @@
         document.getElementById("total").innerText = total.toFixed(2);
     }
 
+    function limpiar() {
+        carrito = {};
+        document.querySelectorAll("[id^='cant-']").forEach(el => el.innerText = "0");
+        render();
+    }
+
     function guardar() {
         let mesa = document.getElementById("mesa").value;
 
@@ -150,8 +234,7 @@
         .then(r => r.json())
         .then(d => {
             alert("Pedido guardado");
-            window.location.href = '/Comandas/Index';
+            window.location.href = d.redirect;
         });
     }
 </script>
-

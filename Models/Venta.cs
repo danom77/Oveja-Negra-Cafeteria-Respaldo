@@ -22,6 +22,7 @@ namespace OvejaNegra.Models
         //Relaciones
         public int ComandaId { get; set; }
         public virtual Comanda? Comanda { get; set; }
+        public int? ClienteId { get; set; }
         public virtual Cliente? Cliente { get; set; }
     }
 }

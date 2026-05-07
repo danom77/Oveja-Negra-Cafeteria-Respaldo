@@ -1,8 +1,401 @@
-﻿@{
+﻿
+
+
+@{
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Inicio</h1>
-    <p>Aqui creas lo que te parezca conveniente xd seria el menu o las cositas de la cafeteria</a>.</p>
+
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+<style>
+
+    body {
+        background: #f6f3eb;
+        font-family: 'Poppins', sans-serif;
+        overflow-x: hidden;
+    }
+
+    .hero {
+        min-height: 90vh;
+        display: flex;
+        align-items: center;
+        padding: 60px 0;
+    }
+
+    .hero-content h1 {
+        font-size: 64px;
+        font-weight: 700;
+        color: #111827;
+        line-height: 1.1;
+    }
+
+        .hero-content h1 span {
+            color: #7c5a27;
+        }
+
+    .hero-content p {
+        margin-top: 20px;
+        color: #6b7280;
+        font-size: 18px;
+        max-width: 550px;
+    }
+
+    .hero-buttons {
+        margin-top: 30px;
+        display: flex;
+        gap: 15px;
+        flex-wrap: wrap;
+    }
+
+    .btn-principal {
+        background: #111827;
+        color: white;
+        padding: 14px 24px;
+        border-radius: 16px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: .2s;
+    }
+
+        .btn-principal:hover {
+            color: white;
+            transform: translateY(-2px);
+        }
+
+    .btn-secundario {
+        background: white;
+        color: #111827;
+        padding: 14px 24px;
+        border-radius: 16px;
+        text-decoration: none;
+        font-weight: 600;
+        border: 1px solid #e5e7eb;
+        transition: .2s;
+    }
+
+        .btn-secundario:hover {
+            color: #111827;
+            transform: translateY(-2px);
+        }
+
+    .hero-image {
+        position: relative;
+    }
+
+        .hero-image img {
+            width: 100%;
+            border-radius: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+
+    .floating-card {
+        position: absolute;
+        bottom: -20px;
+        left: -20px;
+        background: white;
+        padding: 18px;
+        border-radius: 20px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+        width: 220px;
+    }
+
+        .floating-card h5 {
+            margin: 0;
+            font-weight: 700;
+            color: #111827;
+        }
+
+        .floating-card p {
+            margin: 5px 0 0;
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+    .section-title {
+        text-align: center;
+        margin-bottom: 50px;
+    }
+
+        .section-title h2 {
+            font-size: 42px;
+            font-weight: 700;
+            color: #111827;
+        }
+
+        .section-title p {
+            color: #6b7280;
+        }
+
+    .feature-card {
+        background: white;
+        padding: 30px;
+        border-radius: 24px;
+        text-align: center;
+        height: 100%;
+        box-shadow: 0 4px 18px rgba(0,0,0,0.08);
+        transition: .2s;
+    }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+
+    .feature-icon {
+        width: 80px;
+        height: 80px;
+        background: #f3efe7;
+        color: #7c5a27;
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: auto;
+        font-size: 34px;
+        margin-bottom: 20px;
+    }
+
+    .feature-card h4 {
+        font-weight: 700;
+        color: #111827;
+    }
+
+    .feature-card p {
+        color: #6b7280;
+        margin-top: 10px;
+    }
+
+    .welcome-banner {
+        margin-top: 80px;
+        background: linear-gradient(135deg, #111827, #2d3748);
+        border-radius: 30px;
+        padding: 60px;
+        color: white;
+        text-align: center;
+    }
+
+        .welcome-banner h2 {
+            font-size: 42px;
+            font-weight: 700;
+        }
+
+        .welcome-banner p {
+            margin-top: 15px;
+            color: #d1d5db;
+            font-size: 18px;
+        }
+
+    @@media(max-width: 992px) {
+
+        .hero-content h1 {
+            font-size: 48px;
+        }
+
+        .hero {
+            text-align: center;
+        }
+
+        .hero-buttons {
+            justify-content: center;
+        }
+
+        .floating-card {
+            position: static;
+            margin-top: 20px;
+            width: 100%;
+        }
+    }
+
+    @@media(max-width: 768px) {
+
+        .hero-content h1 {
+            font-size: 38px;
+        }
+
+        .section-title h2 {
+            font-size: 32px;
+        }
+
+        .welcome-banner {
+            padding: 35px 20px;
+        }
+
+            .welcome-banner h2 {
+                font-size: 30px;
+            }
+    }
+
+</style>
+
+<div class="container">
+
+    <section class="hero">
+
+        <div class="row align-items-center g-5">
+
+            <div class="col-lg-6">
+
+                <div class="hero-content">
+
+                    <h1>
+                        Bienvenido a
+                        <span>Oveja Negra Café</span>
+                    </h1>
+
+                    <p>
+                        Un espacio acogedor donde el café, los postres y los buenos momentos
+                        se combinan para brindarte la mejor experiencia.
+                    </p>
+
+                    <div class="hero-buttons">
+
+                        <a asp-controller="Comandas"
+                           asp-action="Index"
+                           class="btn-principal">
+
+                            <i class="bi bi-cup-hot"></i>
+                            Ver Pedidos
+
+                        </a>
+
+                        <a asp-controller="Ventas"
+                           asp-action="Index"
+                           class="btn-secundario">
+
+                            <i class="bi bi-receipt"></i>
+                            Ver Ventas
+
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="col-lg-6">
+
+                <div class="hero-image">
+
+                    <img src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?q=80&w=1200&auto=format&fit=crop"
+                         alt="Cafe" />
+
+                    <div class="floating-card">
+
+                        <h5>
+                            ☕ Café Artesanal
+                        </h5>
+
+                        <p>
+                            Preparado con ingredientes de calidad y pasión.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <section class="mb-5">
+
+        <div class="section-title">
+
+            <h2>
+                Nuestra Cafetería
+            </h2>
+
+            <p>
+                Disfruta de un ambiente cálido y moderno.
+            </p>
+
+        </div>
+
+        <div class="row g-4">
+
+            <div class="col-lg-4 col-md-6">
+
+                <div class="feature-card">
+
+                    <div class="feature-icon">
+                        <i class="bi bi-cup-hot-fill"></i>
+                    </div>
+
+                    <h4>
+                        Café Premium
+                    </h4>
+
+                    <p>
+                        Variedad de cafés preparados al instante.
+                    </p>
+
+                </div>
+
+            </div>
+
+            <div class="col-lg-4 col-md-6">
+
+                <div class="feature-card">
+
+                    <div class="feature-icon">
+                        <i class="bi bi-cake2-fill"></i>
+                    </div>
+
+                    <h4>
+                        Postres Caseros
+                    </h4>
+
+                    <p>
+                        Tortas y postres frescos todos los días.
+                    </p>
+
+                </div>
+
+            </div>
+
+            <div class="col-lg-4 col-md-12">
+
+                <div class="feature-card">
+
+                    <div class="feature-icon">
+                        <i class="bi bi-people-fill"></i>
+                    </div>
+
+                    <h4>
+                        Ambiente Acogedor
+                    </h4>
+
+                    <p>
+                        Perfecto para reuniones, estudio y momentos especiales.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <section class="welcome-banner">
+
+        <h2>
+            Gracias por visitar Oveja Negra Café
+        </h2>
+
+        <p>
+            Gestiona pedidos, ventas y clientes de manera rápida y moderna.
+        </p>
+
+    </section>
+
 </div>
+

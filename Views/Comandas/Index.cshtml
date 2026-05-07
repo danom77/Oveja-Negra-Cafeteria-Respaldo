@@ -1,112 +1,529 @@
 ﻿@model IEnumerable<OvejaNegra.Models.Comanda>
+
 @{
-    ViewData["Title"] = "Comanda";
+    ViewData["Title"] = "Pedidos";
 }
 
-<h1>Lista de Pedidos</h1>
-<p>
-    <a asp-action="Create">Añadir Pedido</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>@Html.DisplayNameFor(model => model.Fecha)</th>
-            <th>@Html.DisplayNameFor(model => model.Nro_Mesa)</th>
-            <th>@Html.DisplayNameFor(model => model.Estado)</th>
-            <th>@Html.DisplayNameFor(model => model.Usuario.Apellido)</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+<style>
+    body {
+        background: #f6f3eb;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 20px;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+    }
+
+    .title {
+        font-size: 28px;
+        font-weight: 700;
+        color: #111827;
+    }
+
+    .subtitle {
+        color: #6b7280;
+        font-size: 13px;
+        margin-top: -5px;
+    }
+
+    .btn-nuevo {
+        background: #111827;
+        color: white;
+        border-radius: 10px;
+        padding: 8px 18px;
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: 500;
+    }
+
+        .btn-nuevo:hover {
+            color: white;
+            opacity: .9;
+        }
+
+    .pedido-card {
+        background: white;
+        border-radius: 14px;
+        padding: 12px 15px;
+        margin-bottom: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        border: 1px solid #ece7dc;
+    }
+
+    .pedido-grid {
+        display: grid;
+        grid-template-columns: 100px 90px 1fr 140px 90px;
+        gap: 15px;
+        align-items: center;
+    }
+
+    @@media (max-width: 1000px) {
+        .pedido-grid
+
+    {
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+
+    }
+
+    @@media (max-width: 600px) {
+        .pedido-grid
+
+    {
+        grid-template-columns: 1fr;
+    }
+
+    }
+
+    .pedido-numero {
+        font-size: 18px;
+        font-weight: 700;
+        color: #111827;
+    }
+
+    .pedido-fecha {
+        color: #6b7280;
+        font-size: 11px;
+        margin-top: 3px;
+    }
+
+    .mesa-box {
+        background: #f3efe7;
+        border-radius: 8px;
+        padding: 6px 10px;
+        text-align: center;
+    }
+
+    .mesa-label {
+        color: #6b7280;
+        font-size: 10px;
+        margin-bottom: 3px;
+    }
+
+    .mesa-numero {
+        font-size: 16px;
+        font-weight: 500;
+        color: #7c5a27;
+    }
+
+    .pedido-productos {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .producto-item {
+        color: #374151;
+        font-size: 12px;
+        font-weight: 500;
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .pedido-total {
+        margin-top: 6px;
+        font-size: 13px;
+        font-weight: 600;
+        color: #7c5a27;
+    }
+
+    .estado-btn {
+        border-radius: 10px;
+        border: none;
+        padding: 6px 12px;
+        font-size: 12px;
+        font-weight: 500;
+        width: 100%;
+    }
+
+    .estado-pendiente {
+        background: #fff8db;
+        color: #946200;
+        border: 1px solid #f5d442;
+    }
+
+    .estado-preparacion {
+        background: #dcecff;
+        color: #2752b5;
+        border: 1px solid #9cc4ff;
+    }
+
+    .estado-listo {
+        background: #daf5e5;
+        color: #137a41;
+        border: 1px solid #84ddb0;
+    }
+
+    .estado-servido {
+        background: #ecebff;
+        color: #5145cd;
+        border: 1px solid #bdb8ff;
+    }
+
+    .estado-cobrado {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+
+    .btn-editar {
+        background: #111827;
+        color: white;
+        border-radius: 10px;
+        padding: 8px 12px;
+        text-decoration: none;
+        font-size: 12px;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+    }
+
+        .btn-editar:hover {
+            color: white;
+            opacity: .9;
+        }
+
+    .dropdown-menu {
+        border-radius: 12px;
+        border: none;
+        padding: 6px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        font-size: 12px;
+    }
+
+    .dropdown-item {
+        padding: 6px 12px;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 500;
+    }
+
+        .dropdown-item:hover {
+            background: #f4f4f4;
+        }
+
+    .modal-content {
+        border-radius: 14px;
+    }
+
+    .modal-header {
+        padding: 12px 15px;
+    }
+
+        .modal-header h5 {
+            font-size: 16px;
+            margin: 0;
+        }
+
+    .modal-body {
+        padding: 15px;
+    }
+
+        .modal-body label {
+            font-size: 12px;
+            margin-bottom: 4px;
+        }
+
+        .modal-body .form-control {
+            font-size: 13px;
+            padding: 6px 10px;
+            border-radius: 8px;
+        }
+
+    .modal-footer {
+        padding: 12px 15px;
+    }
+
+        .modal-footer .btn {
+            font-size: 12px;
+            padding: 6px 15px;
+            border-radius: 8px;
+        }
+</style>
+
+<div class="container mt-3">
+    <div class="page-header">
+        <div>
+            <div class="title">
+                <i class="bi bi-cart"></i> Pedidos del Día
+            </div>
+            <div class="subtitle">
+                Gestiona todos los pedidos activos
+            </div>
+        </div>
+
+        <a asp-action="Create" class="btn-nuevo">
+            <i class="bi bi-plus-lg"></i>
+            Nuevo Pedido
+        </a>
+    </div>
+
+    @foreach (var item in Model)
+    {
+        decimal total = 0;
+
+        if (item.DetallesComanda != null)
         {
-            <tr>
-                <td>@Html.DisplayFor(modelItem => item.Fecha)</td>
-                <td>@Html.DisplayFor(modelItem => item.Nro_Mesa)</td>
-                <td>
-                    @if (item.Estado == OvejaNegra.Dtos.EstadoEnum.Pendiente)
-                    {
-                        <span>Pendiente</span>
-                    }
-                    @if (item.Estado == OvejaNegra.Dtos.EstadoEnum.EnPreparacion)
-                    {
-                        <span>En Preparación</span>
-                    }
-                    @if (item.Estado == OvejaNegra.Dtos.EstadoEnum.ListoParaServir)
-                    {
-                        <span>Listo Para Servir</span>
-                    }
-                    @if (item.Estado == OvejaNegra.Dtos.EstadoEnum.Servido)
-                    {
-                        <span>Servido</span>
-                    }
-                </td>
-                <td>@Html.DisplayFor(modelItem => item.Usuario.Apellido)</td>
-                <td>
-                    <a asp-action="Edit" asp-route-id="@item.Id">Editar</a> |
-                    <a asp-action="Details" asp-route-id="@item.Id">Detalles</a> |
-                    <div class="dropdown d-inline">
-                        <button class="btn btn-sm btn-outline-primary dropdown-toggle"
-                                type="button"
+            total = item.DetallesComanda.Sum(x => x.Cantidad * x.Precio_unitario);
+        }
+
+        string claseEstado = "estado-pendiente";
+        string textoEstado = "Pendiente";
+
+        if (item.Estado == OvejaNegra.Dtos.EstadoEnum.EnPreparacion)
+        {
+            claseEstado = "estado-preparacion";
+            textoEstado = "En Preparación";
+        }
+
+        if (item.Estado == OvejaNegra.Dtos.EstadoEnum.ListoParaServir)
+        {
+            claseEstado = "estado-listo";
+            textoEstado = "Listo";
+        }
+
+        if (item.Estado == OvejaNegra.Dtos.EstadoEnum.Servido)
+        {
+            claseEstado = "estado-servido";
+            textoEstado = "Servido";
+        }
+
+        if (item.Estado == OvejaNegra.Dtos.EstadoEnum.Cobrado)
+        {
+            claseEstado = "estado-cobrado";
+            textoEstado = "Cobrado";
+        }
+
+        <div class="pedido-card">
+            <div class="pedido-grid">
+                <div>
+                    <div class="pedido-numero">
+                        #@item.Id.ToString("000")
+                    </div>
+                    <div class="pedido-fecha">
+                        <i class="bi bi-clock"></i> @item.Fecha.ToString("HH:mm")
+                    </div>
+                    <div class="pedido-fecha">
+                        <i class="bi bi-calendar3"></i> @item.Fecha.ToString("dd/MM/yyyy")
+                    </div>
+                </div>
+
+                <div>
+                    <div class="mesa-label">
+                        Mesa
+                    </div>
+                    <div class="mesa-box">
+                        <div class="mesa-numero">
+                            @item.Nro_Mesa
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="mesa-label mb-1">
+                        Pedido
+                    </div>
+                    <div class="pedido-productos">
+                        @if (item.DetallesComanda != null)
+                        {
+                            @foreach (var detalle in item.DetallesComanda.Take(3))
+                            {
+                                <div class="producto-item">
+                                    <span>@detalle.Producto?.Nombre</span>
+                                    <strong>x @detalle.Cantidad</strong>
+                                </div>
+                            }
+                            @if (item.DetallesComanda.Count() > 3)
+                            {
+                                <div class="producto-item text-muted">
+                                    <small>+ @(item.DetallesComanda.Count() - 3) más</small>
+                                </div>
+                            }
+                        }
+                        <div class="pedido-total">
+                            Total: @total.ToString("N2") Bs.
+                        </div>
+                    </div>
+                </div>
+
+
+                <div>
+                    <div class="mesa-label mb-1">
+                        Estado
+                    </div>
+                    <div class="dropdown">
+                        <button class="estado-btn @claseEstado dropdown-toggle"
                                 data-bs-toggle="dropdown">
-                            Estado
+                            @textoEstado
                         </button>
                         <ul class="dropdown-menu">
-                            <li>
-                                <a class="dropdown-item" href="#"
-                                   onclick="cambiarEstado(@item.Id, 1)">
-                                    Pendiente
-                                </a>
-                            </li>
-                            <li>
-                                <a class="dropdown-item" href="#"
-                                   onclick="cambiarEstado(@item.Id, 2)">
-                                    En Preparacion
-                                </a>
-                            </li>
-                            <li>
-                                <a class="dropdown-item" href="#"
-                                   onclick="cambiarEstado(@item.Id, 3)">
-                                    Listo Para Servir
-                                </a>
-                            </li>
-                            <li>
-                                <a class="dropdown-item" href="#"
-                                   onclick="cambiarEstado(@item.Id, 4)">
-                                    Servido
-                                </a>
-                            </li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li>
-                                <a class="dropdown-item text-danger" href="#"
-                                   onclick="cambiarEstado(@item.Id, 6)">
-                                    Cancelar
-                                </a>
-                            </li>
+                            @if (item.Estado != OvejaNegra.Dtos.EstadoEnum.Cobrado)
+                            {
+                                <li>
+                                    <a class="dropdown-item" href="#" onclick="cambiarEstado(@item.Id,1)">
+                                        Pendiente
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="#" onclick="cambiarEstado(@item.Id,2)">
+                                        En Preparación
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="#" onclick="cambiarEstado(@item.Id,3)">
+                                        Listo
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="#" onclick="cambiarEstado(@item.Id,4)">
+                                        Servido
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <a class="dropdown-item text-success" href="#" onclick="abrirCobro(@item.Id)">
+                                        Cobrar
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <a class="dropdown-item text-danger" href="#" onclick="cambiarEstado(@item.Id,6)">
+                                        Cancelar
+                                    </a>
+                                </li>
+                            }
+                            else
+                            {
+                                <li>
+                                    <a class="dropdown-item disabled" href="#">
+                                        Pedido cobrado
+                                    </a>
+                                </li>
+                            }
                         </ul>
                     </div>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+                </div>
+                <div>
+                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn-editar">
+                        <i class="bi bi-pencil-square"></i>
+                        Editar
+                    </a>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<div class="modal fade" id="modalCobro" tabindex="-1">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"> Cobrar Pedido</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="comandaIdCobro" />
+                <div class="mb-2">
+                    <label class="form-label">Nombre Cliente</label> 
+                    <input type="text" class="form-control" id="nombreCliente" placeholder="Cliente ocasional" />
+                </div>
+                <div class="mb-2">
+                    <label class="form-label">CI / NIT</label>
+                    <input type="text" class="form-control" id="ciNit" placeholder="Opcional" />
+                </div>
+                <div class="mb-2">
+                    <label class="form-label">Método Pago</label>
+                    <select class="form-control" id="metodoPago">
+                        <option value="1"> Efectivo</option>
+                        <option value="2"> QR</option>
+                        <option value="3"> Tarjeta</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                <button class="btn btn-success btn-sm" onclick="confirmarCobro()">Cobrar</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <script>
     function cambiarEstado(comandaId, estado) {
         let mensaje = estado === 6
-            ? "Seguro que quieres cancelar este pedido?"
-            : "Cambiar el estado del pedido?";
+            ? "¿Seguro que quieres cancelar este pedido?"
+            : "¿Cambiar el estado del pedido?";
 
         if (!confirm(mensaje)) return;
 
         fetch('/Comandas/CambiarEstado', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ comandaId: comandaId, estado: estado })
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                comandaId: comandaId,
+                estado: estado
+            })
         })
         .then(r => r.json())
         .then(d => {
-            if (d.ok) location.reload();
+            if (d.ok)
+                location.reload();
+        });
+    }
+
+    function abrirCobro(comandaId) {
+        document.getElementById("comandaIdCobro").value = comandaId;
+        document.getElementById("nombreCliente").value = "";
+        document.getElementById("ciNit").value = "";
+        document.getElementById("metodoPago").value = "1";
+
+        let modal = new bootstrap.Modal(document.getElementById('modalCobro'));
+        modal.show();
+    }
+
+    function confirmarCobro() {
+        let data = {
+            comandaId: parseInt(document.getElementById("comandaIdCobro").value),
+            nombreCliente: document.getElementById("nombreCliente").value,
+            ciNit: document.getElementById("ciNit").value,
+            metodoPago: parseInt(document.getElementById("metodoPago").value)
+        };
+
+        fetch('/Comandas/Cobrar', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(d => {
+            if (d.ok) {
+                alert(" Venta realizada");
+                location.reload();
+            } else {
+                alert(" " + (d.msg || "Error al cobrar"));
+            }
+        })
+        .catch(error => {
+            console.log(error);
+            alert(" Error al cobrar");
         });
     }
 </script>

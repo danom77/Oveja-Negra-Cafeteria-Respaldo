@@ -1,113 +1,205 @@
 ﻿@model OvejaNegra.Models.Usuario
+
 @{
     ViewData["Title"] = "Editar Usuario";
 }
 
-<h1>Editar Usuario</h1>
-<hr />
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet">
 
-@if (TempData["ErrorReset"] != null)
-{
-    <div class="alert alert-danger">@TempData["ErrorReset"]</div>
-}
-@if (TempData["Mensaje"] != null)
-{
-    <div class="alert alert-success">@TempData["Mensaje"]</div>
-}
+<style>
 
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="Id" />
-            <input type="hidden" asp-for="password" />
+    body {
+        background: #f6f3eb;
+        font-family: 'Poppins',sans-serif;
+    }
 
-            <div class="form-group mb-3">
-                <label asp-for="Nombre" class="control-label"></label>
-                <input asp-for="Nombre" class="form-control" />
-                <span asp-validation-for="Nombre" class="text-danger"></span>
-            </div>
-            <div class="form-group mb-3">
-                <label asp-for="Apellido" class="control-label"></label>
-                <input asp-for="Apellido" class="form-control" />
-                <span asp-validation-for="Apellido" class="text-danger"></span>
-            </div>
-            <div class="form-group mb-3">
-                <label asp-for="username" class="control-label"></label>
-                <input asp-for="username" class="form-control" />
-                <span asp-validation-for="username" class="text-danger"></span>
-            </div>
-            <div class="form-group mb-3">
-                <label asp-for="Rol" class="control-label"></label>
-                <select asp-for="Rol" class="form-control">
-                    @foreach (var rol in Enum.GetValues(typeof(OvejaNegra.Dtos.Rolenum)))
-                    {
-                        <option value="@((int)rol)">@rol</option>
-                    }
-                </select>
-                <span asp-validation-for="Rol" class="text-danger"></span>
-            </div>
+    .form-card {
+        max-width: 900px;
+        margin: 40px auto;
+        background: white;
+        border-radius: 24px;
+        overflow: hidden;
+        box-shadow: 0 4px 18px rgba(0,0,0,.08);
+    }
 
-            <div class="form-group mb-3">
-                <input type="submit" value="Guardar" class="btn btn-primary" />
-            </div>
-        </form>
+    .header {
+        padding: 28px 35px;
+        border-bottom: 1px solid #ebe6dc;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
 
-        <hr />
-        <h5>Resetear Contraseña</h5>
-        <button class="btn btn-warning mb-3"
-                onclick="document.getElementById('formReset').style.display='block'">
-            Olvido su contrasena
-        </button>
+    .title {
+        font-size: 38px;
+        font-weight: 700;
+    }
 
-        <form id="formReset" style="display:none"
-              asp-action="ResetearPassword" asp-controller="Usuarios" method="post">
-            <input type="hidden" name="id" value="@Model.Id" />
+    .body-custom {
+        padding: 35px;
+    }
 
-            <div class="form-group mb-2">
-                <label>Nueva Contrasena</label>
-                <input type="password" id="nuevaPass" name="nuevaPassword" class="form-control" />
-            </div>
-            <div class="form-group mb-2">
-                <label>Confirmar Contrasena</label>
-                <input type="password" id="confirmarPass" class="form-control" />
-            </div>
-            <span id="errorPass" class="text-danger" style="display:none">
-                Las contrasenas no coinciden
-            </span>
+    .grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+    }
 
-            <div class="form-group mt-2">
-                <button type="button" class="btn btn-danger" onclick="validarReset()">
-                    Resetear
-                </button>
-                <button type="button" class="btn btn-secondary"
-                        onclick="document.getElementById('formReset').style.display='none'">
-                    Cancelar
-                </button>
-            </div>
-        </form>
+    .full {
+        grid-column: 1/3;
+    }
+
+    label {
+        margin-bottom: 8px;
+        font-weight: 500;
+    }
+
+    .form-control,
+    .form-select {
+        height: 58px;
+        border-radius: 16px;
+    }
+
+    .footer {
+        padding: 30px 35px;
+        border-top: 1px solid #ebe6dc;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+    }
+
+    .btn-cancel {
+        height: 58px;
+        border-radius: 16px;
+        border: 1px solid #d1d5db;
+        background: white;
+        font-weight: 600;
+    }
+
+    .btn-save {
+        height: 58px;
+        border-radius: 16px;
+        border: none;
+        background: #111827;
+        color: white;
+        font-weight: 600;
+    }
+
+    @@media(max-width:768px) {
+
+        .grid {
+            grid-template-columns: 1fr;
+        }
+
+        .full {
+            grid-column: auto;
+        }
+
+        .footer {
+            grid-template-columns: 1fr;
+        }
+
+        .title {
+            font-size: 30px;
+        }
+    }
+
+</style>
+
+<div class="form-card">
+
+    <div class="header">
+
+        <div class="title">
+            Editar Usuario
+        </div>
+
+        <a asp-action="Index"
+           style="font-size:28px;color:#6b7280;text-decoration:none;">
+            ×
+        </a>
 
     </div>
+
+    <form asp-action="Edit">
+
+        <div class="body-custom">
+
+            <input type="hidden" asp-for="Id" />
+
+            <div class="grid">
+
+                <div>
+                    <label>Nombre</label>
+                    <input asp-for="Nombre"
+                           class="form-control" />
+                </div>
+
+                <div>
+                    <label>Apellido</label>
+                    <input asp-for="Apellido"
+                           class="form-control" />
+                </div>
+
+                <div class="full">
+                    <label>Username</label>
+                    <input asp-for="username"
+                           class="form-control" />
+                </div>
+
+                <div class="full">
+                    <label>Password</label>
+                    <input asp-for="password"
+                           class="form-control" />
+                </div>
+
+                <div>
+                    <label>Rol</label>
+
+                    <select asp-for="Rol"
+                            class="form-select">
+
+                        <option value="1">Administrador</option>
+                        <option value="2">Cajero</option>
+                        <option value="3">Mesero</option>
+                        <option value="4">Cocinero</option>
+
+                    </select>
+                </div>
+
+                <div>
+                    <label>Estado</label>
+
+                    <select class="form-select">
+
+                        <option>Activo</option>
+
+                    </select>
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="footer">
+
+            <a asp-action="Index"
+               class="btn btn-cancel">
+
+                Cancelar
+
+            </a>
+
+            <button type="submit"
+                    class="btn-save">
+
+                Guardar Cambios
+
+            </button>
+
+        </div>
+
+    </form>
+
 </div>
-
-<div>
-    <a asp-action="Index">Volver</a>
-</div>
-
-@section Scripts {
-    <script>
-        function validarReset() {
-            var nueva     = document.getElementById("nuevaPass").value;
-            var confirmar = document.getElementById("confirmarPass").value;
-            var error     = document.getElementById("errorPass");
-
-            if (nueva !== confirmar) {
-                error.style.display = "block";
-                return;
-            }
-
-            error.style.display = "none";
-            document.getElementById("formReset").submit();
-        }
-    </script>
-}

@@ -1,54 +1,326 @@
 ﻿@model IEnumerable<OvejaNegra.Models.Usuario>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Usuarios";
 }
 
-<h1>Lista de Usuarios</h1>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet">
 
-<p>
-<a asp-action="Create">Create New</a>
-</p>
+<link rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Nombre)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Apellido)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.username)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Rol)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Nombre)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Apellido)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.username)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Rol)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Editar</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Detalles</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+<style>
+
+    body {
+        background: #f6f3eb;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+
+    .title {
+        font-size: 42px;
+        font-weight: 700;
+        color: #111827;
+    }
+
+    .subtitle {
+        color: #6b7280;
+        margin-top: -5px;
+    }
+
+    .btn-add {
+        background: #111827;
+        color: white;
+        padding: 14px 22px;
+        border-radius: 16px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: .2s;
+    }
+
+        .btn-add:hover {
+            color: white;
+            transform: translateY(-2px);
+        }
+
+    .table-card {
+        background: white;
+        border-radius: 22px;
+        overflow: hidden;
+        box-shadow: 0 4px 18px rgba(0,0,0,0.08);
+        border: 1px solid #ebe6dc;
+    }
+
+    .custom-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+        .custom-table thead {
+            background: #faf8f3;
+        }
+
+        .custom-table th {
+            padding: 22px 20px;
+            font-size: 14px;
+            color: #111827;
+            font-weight: 600;
+            text-align: left;
+        }
+
+        .custom-table td {
+            padding: 22px 20px;
+            border-top: 1px solid #f1ede5;
+            color: #374151;
+            vertical-align: middle;
+        }
+
+    .user-id {
+        font-weight: 700;
+        color: #111827;
+    }
+
+    .password-mask {
+        font-weight: 700;
+        letter-spacing: 1px;
+    }
+
+    .badge-role {
+        padding: 8px 14px;
+        border-radius: 30px;
+        font-size: 13px;
+        font-weight: 600;
+        display: inline-block;
+    }
+
+    .admin {
+        background: #f1dfff;
+        color: #8b5cf6;
+    }
+
+    .mesero {
+        background: #dbeafe;
+        color: #2563eb;
+    }
+
+    .cocinero {
+        background: #ffedd5;
+        color: #ea580c;
+    }
+
+    .cajero {
+        background: #dcfce7;
+        color: #16a34a;
+    }
+
+    .estado {
+        background: #dcfce7;
+        color: #16a34a;
+        padding: 8px 14px;
+        border-radius: 30px;
+        font-size: 13px;
+        font-weight: 600;
+        display: inline-block;
+    }
+
+    .acciones {
+        display: flex;
+        gap: 16px;
+    }
+
+        .acciones a {
+            text-decoration: none;
+            font-size: 20px;
+            transition: .2s;
+        }
+
+    .ver {
+        color: #2563eb;
+    }
+
+    .editar {
+        color: #7c5a27;
+    }
+
+    .eliminar {
+        color: #dc2626;
+    }
+
+    .acciones a:hover {
+        transform: scale(1.15);
+    }
+
+    @@media(max-width: 992px) {
+
+        .table-card {
+            overflow-x: auto;
+        }
+
+        .custom-table {
+            min-width: 900px;
+        }
+    }
+
+    @@media(max-width: 768px) {
+
+        .title {
+            font-size: 32px;
+        }
+
+        .btn-add {
+            width: 100%;
+            text-align: center;
+        }
+    }
+
+</style>
+
+<div class="container mt-4">
+
+
+    <div class="page-header">
+
+        <div>
+
+            <div class="title">
+                Gestión de Usuarios
+            </div>
+
+            <div class="subtitle">
+                Administra el personal de la cafetería
+            </div>
+
+        </div>
+
+        <a asp-action="Create"
+           class="btn-add">
+
+            <i class="bi bi-person-plus"></i>
+            Añadir Usuario
+
+        </a>
+
+    </div>
+
+    <div class="table-card">
+
+        <table class="custom-table">
+
+            <thead>
+
+                <tr>
+
+                    <th>ID</th>
+
+                    <th>Nombre</th>
+
+                    <th>Apellido</th>
+
+                    <th>Username</th>
+
+                    <th>Password</th>
+
+                    <th>Rol</th>
+
+                    <th>Acciones</th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                @foreach (var item in Model)
+                {
+                    <tr>
+
+                        <td class="user-id">
+                            @item.Id
+                        </td>
+
+                        <td>
+                            @item.Nombre
+                        </td>
+
+                        <td>
+                            @item.Apellido
+                        </td>
+
+                        <td>
+                            @item.username
+                        </td>
+
+                        <td class="password-mask">
+                            ********
+                        </td>
+
+                        <td>
+
+                            @{
+                                string claseRol = "";
+
+                                if (item.Rol.ToString() == "Administrador")
+                                    claseRol = "admin";
+
+                                else if (item.Rol.ToString() == "Mesero")
+                                    claseRol = "mesero";
+
+                                else if (item.Rol.ToString() == "Cocinero")
+                                    claseRol = "cocinero";
+
+                                else if (item.Rol.ToString() == "Cajero")
+                                    claseRol = "cajero";
+                            }
+
+                            <span class="badge-role @claseRol">
+                                @item.Rol
+                            </span>
+
+                        </td>
+
+
+                        <td>
+
+                            <div class="acciones">
+
+                                <a asp-action="Details"
+                                   asp-route-id="@item.Id"
+                                   class="ver">
+
+                                    <i class="bi bi-eye"></i>
+
+                                </a>
+
+                                <a asp-action="Edit"
+                                   asp-route-id="@item.Id"
+                                   class="editar">
+
+                                    <i class="bi bi-pencil-square"></i>
+
+                                </a>
+
+                               
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+                }
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
