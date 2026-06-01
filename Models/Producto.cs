@@ -20,13 +20,15 @@ namespace OvejaNegra.Models
         [Required]
         [DisplayName("Dìsponibilidad")]
         public bool Disponible { get; set; }
-        [Required, MinLength(5), MaxLength(50)]
+        [Required, MinLength(5), MaxLength(200)]
         [DisplayName("Descripcion del producto")]
         public string? Descripcion { get; set; }
         public string? Imagen { get; set; }
         [NotMapped]
         [DisplayName("Imagen del producto")]
         public IFormFile? ImagenFile { get; set; }
+
+
         //Relaciones
         public int CategoriaId { get; set; }
         [DisplayName("Categoria del producto")]

@@ -348,11 +348,16 @@
                                     </a>
                                 </li>
                                 <li><hr class="dropdown-divider"></li>
-                                <li>
-                                    <a class="dropdown-item text-success" href="#" onclick="abrirCobro(@item.Id)">
-                                        Cobrar
-                                    </a>
-                                </li>
+
+                                @if (User.IsInRole("Administrador") || User.IsInRole("Cajero"))
+                                {
+                                    <li>
+                                        <a class="dropdown-item text-success" href="#"
+                                           onclick="abrirCobro(@item.Id)">
+                                            Cobrado
+                                        </a>
+                                    </li>
+                                }
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
                                     <a class="dropdown-item text-danger" href="#" onclick="cambiarEstado(@item.Id,6)">
@@ -451,7 +456,7 @@
         modal.show();
     }
 
-    function confirmarCobro() {
+           function confirmarCobro() {
         let data = {
             comandaId: parseInt(document.getElementById("comandaIdCobro").value),
             nombreCliente: document.getElementById("nombreCliente").value,
@@ -461,23 +466,23 @@
 
         fetch('/Comandas/Cobrar', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
         })
         .then(response => response.json())
         .then(d => {
             if (d.ok) {
-                alert(" Venta realizada");
-                location.reload();
+                bootstrap.Modal.getInstance(document.getElementById('modalCobro')).hide();
+                if (d.pdf) {
+                    var w = window.open('', '_blank');
+                    w.document.write('<iframe src="data:application/pdf;base64,' + d.pdf + '" width="100%" height="100%" style="border:none;position:fixed;top:0;left:0;width:100%;height:100%"></iframe>');
+                    w.document.close();
+                }
+                setTimeout(function() { location.reload(); }, 500);
             } else {
-                alert(" " + (d.msg || "Error al cobrar"));
+                alert(d.msg || "Error al cobrar");
             }
         })
-        .catch(error => {
-            console.log(error);
-            alert(" Error al cobrar");
-        });
+        .catch(function() { alert("Error al cobrar"); });
     }
 </script>

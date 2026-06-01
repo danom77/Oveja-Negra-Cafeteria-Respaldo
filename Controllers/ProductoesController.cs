@@ -10,8 +10,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
 using System.Threading.Tasks;
-using CloudinaryDotNet;
-using CloudinaryDotNet.Actions;
+
 namespace OvejaNegra.Controllers
 {
     [Authorize(Roles = "Administrador,Cajero,Mesero")]
@@ -110,7 +109,7 @@ namespace OvejaNegra.Controllers
             {
                 try
                 {
-                    if (producto.ImagenFile != null)
+                    if(producto.ImagenFile != null)
                     {
                         await subirFoto(producto);
                     }

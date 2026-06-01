@@ -67,9 +67,12 @@
     <label>Mesa:</label>
     <select id="mesa" class="form-control">
         <option value="">Seleccione mesa</option>
-        @for (int i = 1; i <= 10; i++)
+
+        @foreach (var mesa in Model.MesasDisponibles)
         {
-            <option value="@i">Mesa @i</option>
+            <option value="@mesa">
+                Mesa @mesa
+            </option>
         }
     </select>
 </div>

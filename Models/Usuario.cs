@@ -11,7 +11,7 @@ namespace OvejaNegra.Models
     {
         [Key]
         public int Id { get; set; }
-        [Required, MinLength(2),MaxLength(25)]
+        [Required, MinLength(4),MaxLength(25)]
         [DisplayName("Nombre")]
         public string? Nombre { get; set; }
         [Required, MinLength(2), MaxLength(50)]
@@ -21,7 +21,7 @@ namespace OvejaNegra.Models
         [DisplayName("Nombre de usuario")]
         public string? username { get; set; }
         [DisplayName("Contraseña")]
-        [Required, MinLength(8)]
+        [Required, MinLength(8), MaxLength(100)]
         public string? password { get; set; }
         [DisplayName("Rol")]
         [Required]

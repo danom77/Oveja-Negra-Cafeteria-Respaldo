@@ -10,7 +10,8 @@ namespace OvejaNegra.Models
         [Key]
         public int Id { get; set; }
         [Required]
-        [Column(TypeName = "date")]
+        [Column(TypeName = "timestamp")]
+        [DisplayName("Fecha de Venta")]
         public DateTime Fecha { get; set; } = DateTime.Now;
         [Required]
         [Column(TypeName = "decimal(10,2)")]

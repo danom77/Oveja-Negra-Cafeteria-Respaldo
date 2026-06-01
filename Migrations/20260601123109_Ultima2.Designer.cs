@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using OvejaNegra.Context;
@@ -11,9 +12,11 @@ using OvejaNegra.Context;
 namespace OvejaNegra.Migrations
 {
     [DbContext(typeof(MiContext))]
-    partial class MiContextModelSnapshot : ModelSnapshot
+    [Migration("20260601123109_Ultima2")]
+    partial class Ultima2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

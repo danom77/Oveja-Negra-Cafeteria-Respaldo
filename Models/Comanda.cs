@@ -10,7 +10,7 @@ namespace OvejaNegra.Models
         [Key]
         public int Id { get; set; }
         [Required]
-        [Column(TypeName = "timestamp")]
+        [Column(TypeName = "datetime")]
         [DisplayName("Fecha de la Comanda")]
         public DateTime Fecha { get; set; } = DateTime.Now;
         [Required]

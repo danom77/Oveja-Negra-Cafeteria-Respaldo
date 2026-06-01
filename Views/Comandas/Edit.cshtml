@@ -151,15 +151,15 @@
     <div class="mb-3">
         <label class="form-label fw-bold">Cambiar número de mesa:</label>
         <select id="mesa" class="form-control w-auto" style="max-width: 200px;">
-            @for (int i = 1; i <= 10; i++)
+            @foreach (var mesa in Model.MesasDisponibles)
             {
-                if (i == Model.NroMesa)
+                if (mesa == Model.NroMesa)
                 {
-                    <option value="@i" selected>Mesa @i</option>
+                    <option value="@mesa" selected>Mesa @mesa</option>
                 }
                 else
                 {
-                    <option value="@i">Mesa @i</option>
+                    <option value="@mesa">Mesa @mesa</option>
                 }
             }
         </select>
@@ -398,7 +398,7 @@
         }
 
         if (Object.keys(itemsFiltrados).length === 0) {
-            alert("⚠️ Agrega al menos un producto antes de actualizar.");
+            alert("Agrega al menos un producto antes de actualizar.");
             return;
         }
 
@@ -418,15 +418,15 @@
         .then(r => r.json())
         .then(d => {
             if (d.ok) {
-                alert("✅ Pedido actualizado correctamente");
+                alert("Pedido actualizado correctamente");
                 window.location.href = d.redirect;
             } else {
-                alert("❌ Error al actualizar el pedido");
+                alert("Error al actualizar el pedido");
             }
         })
         .catch(error => {
             console.error("Error:", error);
-            alert("❌ Error al procesar la solicitud");
+            alert("Error al procesar la solicitud");
         });
     }
 

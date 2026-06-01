@@ -1,6 +1,9 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using DinkToPdf;
+using DinkToPdf.Contracts;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.CodeAnalysis.RulesetToEditorconfig;
 using Microsoft.EntityFrameworkCore;
 using OvejaNegra.Context;
 using OvejaNegra.Dtos;
@@ -19,10 +22,12 @@ namespace OvejaNegra.Controllers
     public class ComandasController : Controller
     {
         private readonly MiContext _context;
+        private readonly IConverter _converter;
 
-        public ComandasController(MiContext context)
+        public ComandasController(MiContext context, IConverter converter)
         {
             _context = context;
+            _converter = converter;
         }
 
         // GET: Comandas
@@ -46,7 +51,7 @@ namespace OvejaNegra.Controllers
 
             return View(comandas);
         }
-        [HttpPost]
+
         public async Task<IActionResult> CambiarEstado([FromBody] CambiarEstadoDTO dto)
         {
             var comanda = await _context.Comandas
@@ -121,9 +126,28 @@ namespace OvejaNegra.Controllers
                 .Where(c => c.Productos.Any(p => p.Disponible))
                 .ToList();
 
+            var estadosActivos = new[]
+            {
+        EstadoEnum.Pendiente,
+        EstadoEnum.EnPreparacion,
+        EstadoEnum.ListoParaServir,
+        EstadoEnum.Servido
+    };
+
+            var mesasOcupadas = _context.Comandas
+                .Where(c => estadosActivos.Contains(c.Estado))
+                .Select(c => c.Nro_Mesa)
+                .Distinct()
+                .ToList();
+
+            var mesasDisponibles = Enumerable.Range(1, 10)
+                .Where(m => !mesasOcupadas.Contains(m))
+                .ToList();
+
             var vm = new CrearComandaVM
             {
-                Categorias = categorias
+                Categorias = categorias,
+                MesasDisponibles = mesasDisponibles
             };
 
             return View(vm);
@@ -141,6 +165,25 @@ namespace OvejaNegra.Controllers
             }
 
             int usuarioId = int.Parse(userIdClaim);
+
+            var existeMesaOcupada = await _context.Comandas.AnyAsync(c =>
+    c.Nro_Mesa == vm.NroMesa &&
+    (
+        c.Estado == EstadoEnum.Pendiente ||
+        c.Estado == EstadoEnum.EnPreparacion ||
+        c.Estado == EstadoEnum.ListoParaServir ||
+        c.Estado == EstadoEnum.Servido
+    ));
+
+            if (existeMesaOcupada)
+            {
+                return Json(new
+                {
+                    ok = false,
+                    msg = "La mesa ya tiene una comanda activa."
+                });
+            }
+
 
             var comanda = new Comanda
             {
@@ -185,11 +228,29 @@ namespace OvejaNegra.Controllers
                 .Where(c => c.Productos.Any(p => p.Disponible))
                 .ToListAsync();
 
+            var estadosActivos = new[]
+            {
+        EstadoEnum.Pendiente,
+        EstadoEnum.EnPreparacion,
+        EstadoEnum.ListoParaServir,
+        EstadoEnum.Servido
+    };
+            var mesasOcupadas = await _context.Comandas
+                .Where(c => estadosActivos.Contains(c.Estado) && c.Id != comanda.Id)
+                .Select(c => c.Nro_Mesa)
+                .Distinct()
+                .ToListAsync();
+
+            var mesasDisponibles = Enumerable.Range(1, 10)
+                .Where(m => !mesasOcupadas.Contains(m))
+                .ToList();
+
             var vm = new EditarComandaVM
             {
                 ComandaId = comanda.Id,
                 NroMesa = comanda.Nro_Mesa,
                 Categorias = categorias,
+                MesasDisponibles = mesasDisponibles,   
                 Items = comanda.DetallesComanda?.ToDictionary(
                     d => d.ProductoId,
                     d => new ItemComandaDTO
@@ -315,7 +376,6 @@ namespace OvejaNegra.Controllers
         {
             return _context.Comandas.Any(e => e.Id == id);
         }
-
         [HttpPost]
         public async Task<IActionResult> Cobrar([FromBody] CobrarDTO dto)
         {
@@ -323,71 +383,157 @@ namespace OvejaNegra.Controllers
             {
                 var comanda = await _context.Comandas
                     .Include(c => c.DetallesComanda)
+                        .ThenInclude(d => d.Producto)
                     .FirstOrDefaultAsync(c => c.Id == dto.ComandaId);
 
                 if (comanda == null)
+                    return Json(new { ok = false, msg = "Comanda no encontrada" });
+
+                bool imprimirFactura = !string.IsNullOrEmpty(dto.CiNit) && dto.CiNit != "00000000";
+
+                Cliente cliente;
+
+                if (imprimirFactura)
                 {
-                    return Json(new
+                    cliente = await _context.Clientes
+                        .FirstOrDefaultAsync(c => c.NITCI == dto.CiNit);
+
+                    if (cliente == null)
                     {
-                        ok = false,
-                        msg = "Comanda no encontrada"
-                    });
+                        cliente = new Cliente
+                        {
+                            Nombre = string.IsNullOrEmpty(dto.NombreCliente) ? "Cliente" : dto.NombreCliente,
+                            NITCI = dto.CiNit
+                        };
+                        _context.Clientes.Add(cliente);
+                        await _context.SaveChangesAsync();
+                    }
                 }
-
-                // BUSCAR CLIENTE
-                var cliente = await _context.Clientes
-                    .FirstOrDefaultAsync(c => c.NITCI == dto.CiNit);
-
-                // CREAR SI NO EXISTE
-                if (cliente == null)
+                else
                 {
                     cliente = new Cliente
                     {
-                        Nombre = dto.NombreCliente,
-                        NITCI = dto.CiNit
+                        Nombre = "Ocasional",
+                        NITCI = null
                     };
-
                     _context.Clientes.Add(cliente);
-
                     await _context.SaveChangesAsync();
                 }
 
-                // TOTAL
                 decimal total = comanda.DetallesComanda
                     .Sum(x => x.Cantidad * x.Precio_unitario);
 
-                // CREAR VENTA
                 var venta = new Venta
                 {
                     Fecha = DateTime.Now,
                     Total = total,
-
                     MetodoPago = dto.MetodoPago,
-
                     ComandaId = comanda.Id,
-
                     ClienteId = cliente.Id
                 };
 
                 _context.Ventas.Add(venta);
-
-                // CAMBIAR ESTADO
                 comanda.Estado = EstadoEnum.Cobrado;
-
                 await _context.SaveChangesAsync();
 
-                return Json(new
+                string base64 = null;
+
+                if (imprimirFactura)
                 {
-                    ok = true
-                });
+                    var metodoPagoTexto = dto.MetodoPago == PagoEnum.Efectivo ? "Efectivo" :
+                                          dto.MetodoPago == PagoEnum.QR ? "QR" : "Tarjeta";
+
+                    var filas = string.Join("", comanda.DetallesComanda.Select(d =>
+                        $@"<tr>
+                    <td>{d.Producto?.Nombre}</td>
+                    <td style='text-align:center'>{d.Cantidad}</td>
+                    <td style='text-align:right'>{d.Precio_unitario:N2}</td>
+                    <td style='text-align:right'>{d.Cantidad * d.Precio_unitario:N2}</td>
+                </tr>"));
+
+                    var html = $@"
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset='utf-8'>
+                <style>
+                    body {{ font-family: 'Courier New', monospace; font-size: 13px; padding: 20px; max-width: 320px; margin: auto; color: #111; }}
+                    .header {{ text-align: center; border-bottom: 1px dashed #aaa; padding-bottom: 10px; margin-bottom: 14px; }}
+                    .header h2 {{ font-size: 18px; letter-spacing: 2px; margin-bottom: 4px; }}
+                    .header p {{ font-size: 11px; color: #555; margin: 2px 0; }}
+                    .info {{ font-size: 12px; line-height: 1.9; margin-bottom: 12px; }}
+                    .info b {{ font-weight: bold; }}
+                    table {{ width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 12px; }}
+                    thead tr {{ border-top: 1px dashed #aaa; border-bottom: 1px dashed #aaa; }}
+                    th {{ padding: 5px 2px; font-size: 11px; text-align: left; }}
+                    th:nth-child(2) {{ text-align: center; }}
+                    th:nth-child(3), th:nth-child(4) {{ text-align: right; }}
+                    td {{ padding: 4px 2px; }}
+                    .total-section {{ border-top: 1px dashed #aaa; padding-top: 10px; }}
+                    .total-final {{ display: flex; justify-content: space-between; font-size: 16px; font-weight: bold; border-top: 1px dashed #aaa; padding-top: 6px; margin-top: 6px; }}
+                    .metodo {{ font-size: 11px; color: #555; text-align: right; margin-top: 4px; }}
+                    .footer {{ text-align: center; border-top: 1px dashed #aaa; margin-top: 16px; padding-top: 10px; font-size: 11px; color: #777; line-height: 1.8; }}
+                </style>
+            </head>
+            <body>
+                <div class='header'>
+                    <h2>OVEJA NEGRA</h2>
+                    <p>Restaurante &amp; Bar</p>
+                    <p>─────────────────────</p>
+                    <p><strong>FACTURA #{venta.Id:D6}</strong></p>
+                    <p>{venta.Fecha:dd/MM/yyyy HH:mm}</p>
+                </div>
+                <div class='info'>
+                    <div><b>Cliente:</b> {cliente.Nombre}</div>
+                    <div><b>CI/NIT:</b> {cliente.NITCI}</div>
+                    <div><b>Mesa:</b> {comanda.Nro_Mesa}</div>
+                    <div><b>Pago:</b> {metodoPagoTexto}</div>
+                    <div><b>Comanda:</b> #{comanda.Id:D3}</div>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Cant</th>
+                            <th>P.U.</th>
+                            <th>Sub.</th>
+                        </tr>
+                    </thead>
+                    <tbody>{filas}</tbody>
+                </table>
+                <div class='total-section'>
+                    <div class='total-final'>
+                        <span>TOTAL</span>
+                        <span>{total:N2} Bs.</span>
+                    </div>
+                    <div class='metodo'>Metodo de pago: {metodoPagoTexto}</div>
+                </div>
+                <div class='footer'>
+                    <p>Gracias por su visita!</p>
+                    <p>Vuelva pronto</p>
+                </div>
+            </body>
+            </html>";
+
+                    var pdf = _converter.Convert(new HtmlToPdfDocument()
+                    {
+                        GlobalSettings = new GlobalSettings
+                        {
+                            PaperSize = PaperKind.A6,
+                            Orientation = Orientation.Portrait,
+                            Margins = new MarginSettings { Top = 10, Bottom = 10, Left = 10, Right = 10 }
+                        },
+                        Objects = { new ObjectSettings { HtmlContent = html } }
+                    });
+
+                    base64 = Convert.ToBase64String(pdf);
+                }
+
+                return Json(new { ok = true, pdf = base64 });
             }
             catch (Exception ex)
             {
-                return Json(new
-                {
-                    ok = false,
-                    msg = ex.Message
-                });
+                return Json(new { ok = false, msg = ex.Message });
             }
         }
     }

@@ -1,6 +1,11 @@
 wwwroot\css\site.css
 wwwroot\favicon.ico
 wwwroot\imagenes\1.jpg
+wwwroot\imagenes\4.jpg
+wwwroot\imagenes\5.webp
+wwwroot\imagenes\7.webp
+wwwroot\imagenes\logo.jpeg
+wwwroot\imagenes\no-image.jpeg
 wwwroot\imagenes\oveja-negra.jpeg
 wwwroot\js\site.js
 wwwroot\lib\bootstrap\dist\css\bootstrap-grid.css

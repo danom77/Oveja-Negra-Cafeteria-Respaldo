@@ -148,7 +148,7 @@ namespace OvejaNegra.Controllers
                 .Include(v => v.Cliente)
                 .Include(v => v.Comanda)
                 .ToListAsync();
-
+             
             if (venta == null)
             {
                 return NotFound();

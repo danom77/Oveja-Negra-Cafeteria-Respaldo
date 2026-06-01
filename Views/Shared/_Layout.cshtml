@@ -18,7 +18,7 @@
             <div class="container-fluid">
 
                 <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
-                    <img src="~/imagenes/oveja-negra.jpeg" alt="Logo"
+                    <img src="~/imagenes/logo.jpeg" alt="Logo"
                          style="width:36px; height:36px; border-radius:8px; object-fit:cover;" />
                     OvejaNegra
                 </a>
@@ -32,7 +32,7 @@
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Inicio</a>
                         </li>
                         @if (User.IsInRole("Mesero"))
                         {
@@ -80,7 +80,7 @@
                             </li>
                         }
                         <li class="nav-item">
-                            <a class="nav-link" asp-controller="Home" asp-action="Menu">Menu</a>
+                            <a class="nav-link" asp-controller="Home" asp-action="Menu">Reportes</a>
                         </li>
                     </ul>
 
