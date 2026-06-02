@@ -217,20 +217,48 @@
     }
 
     function guardar() {
-        let mesa = document.getElementById("mesa").value;
+        let mesa = parseInt(document.getElementById("mesa").value);
+
+        if (!mesa || isNaN(mesa)) {
+            alert("Por favor seleccione una mesa.");
+            return;
+        }
+
+        for (let id in carrito) {
+            let obsEl = document.getElementById("obs-" + id);
+            if (obsEl) carrito[id].observacion = obsEl.value;
+        }
+
+        let itemsFiltrados = {};
+        for (let id in carrito) {
+            if (carrito[id].cantidad > 0) {
+                itemsFiltrados[id] = carrito[id];
+            }
+        }
+
+        if (Object.keys(itemsFiltrados).length === 0) {
+            alert("Agregue al menos un producto.");
+            return;
+        }
 
         fetch('/Comandas/CrearPedido', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 nroMesa: mesa,
-                items: carrito
+                items: itemsFiltrados
             })
         })
         .then(r => r.json())
         .then(d => {
-            alert("Pedido guardado");
-            window.location.href = d.redirect;
+            if (d.ok) {
+                window.location.href = d.redirect;
+            } else {
+                alert("Error: " + d.msg);
+            }
+        })
+        .catch(err => {
+            alert("Error al conectar con el servidor: " + err);
         });
     }
 </script>
