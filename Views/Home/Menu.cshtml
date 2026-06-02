@@ -282,8 +282,7 @@
 
                             @if (!string.IsNullOrEmpty(prod.Imagen))
                             {
-                                <img src="~/imagenes/@prod.Imagen"
-                                     class="prod-img" alt="@prod.Nombre" />
+                                <img src="@prod.Imagen" class="prod-img" alt="@prod.Nombre" />
                             }
                             else
                             {
@@ -291,7 +290,6 @@
                                     <i class="bi bi-cup-hot"></i>
                                 </div>
                             }
-
                             <div class="prod-body">
                                 <div>
                                     <div class="prod-nombre">@prod.Nombre</div>

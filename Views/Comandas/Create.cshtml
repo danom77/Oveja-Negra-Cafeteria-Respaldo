@@ -243,6 +243,7 @@
 
         fetch('/Comandas/CrearPedido', {
             method: 'POST',
+            credentials: 'include',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 nroMesa: mesa,
@@ -257,8 +258,6 @@
                 alert("Error: " + d.msg);
             }
         })
-        .catch(err => {
-            alert("Error al conectar con el servidor: " + err);
-        });
+        .catch(() => alert("Error al guardar el pedido."));
     }
 </script>
