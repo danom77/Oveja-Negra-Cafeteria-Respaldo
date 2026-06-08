@@ -383,11 +383,30 @@ namespace OvejaNegra.Controllers
             {
                 var comanda = await _context.Comandas
                     .Include(c => c.DetallesComanda)
-                        .ThenInclude(d => d.Producto)
+                    .ThenInclude(d => d.Producto)
                     .FirstOrDefaultAsync(c => c.Id == dto.ComandaId);
 
                 if (comanda == null)
                     return Json(new { ok = false, msg = "Comanda no encontrada" });
+
+                if (string.IsNullOrWhiteSpace(dto.NombreCliente))
+                {
+                    return Json(new
+                    {
+                        ok = false,
+                        msg = "Debe ingresar el nombre del cliente"
+                    });
+                }
+
+                if (!Enum.IsDefined(typeof(PagoEnum), dto.MetodoPago))
+                {
+                    return Json(new
+                    {
+                        ok = false,
+                        msg = "Debe seleccionar un método de pago"
+                    });
+                }
+
 
                 bool imprimirFactura = !string.IsNullOrEmpty(dto.CiNit) && dto.CiNit != "00000000";
 
@@ -402,7 +421,9 @@ namespace OvejaNegra.Controllers
                     {
                         cliente = new Cliente
                         {
-                            Nombre = string.IsNullOrEmpty(dto.NombreCliente) ? "Cliente" : dto.NombreCliente,
+                            Nombre = string.IsNullOrEmpty(dto.NombreCliente) 
+                            ? "Cliente" 
+                            : dto.NombreCliente,
                             NITCI = dto.CiNit
                         };
                         _context.Clientes.Add(cliente);
